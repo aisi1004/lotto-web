@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>개인정보처리방침 – 로또번호발생기 - 회차별 당첨번호 통계 분석</title>
+<style>body{margin:0;background:#f2f4f6;color:#191f28;font:15px/1.7 -apple-system,"Malgun Gothic",sans-serif}main{max-width:720px;margin:0 auto;padding:28px 20px 60px}h1{font-size:22px}h2{font-size:17px;margin-top:28px}li{margin:4px 0}.card{background:#fff;border-radius:16px;padding:20px 22px;margin-top:16px}small{color:#6b7684}@media(prefers-color-scheme:dark){body{background:#101012;color:#f2f4f6}.card{background:#17171c}small{color:#8b95a1}}</style></head>
+<body><main><h1>개인정보처리방침</h1><small>로또번호발생기 - 회차별 당첨번호 통계 분석 (com.imeji.lotto) · 시행일 2026-10-28 · English summary at the bottom</small>
+<div class="card">
+<h2>1. 수집하는 개인정보</h2>
+<p>로또번호발생기은 회원가입이 없고, 이름·이메일·전화번호·위치 등 개인정보를 수집하지 않습니다.</p>
+<h2>2. 기기에 저장되는 정보</h2>
+<ul><li>내가 저장한 번호(회차·번호·고른 방식)</li><li>추천 설정(고른 방식, 게임 수, 고정·제외 번호 등)</li><li>마지막으로 받은 당첨번호 데이터(오프라인 표시용)</li></ul>
+<p>위 정보는 사용자의 기기 안에만 저장되고 서버로 전송되지 않으며, 앱을 삭제하면 함께 지워집니다.</p>
+<h2>3. 외부 서비스</h2>
+<p>당첨번호 데이터는 lotto.imeji.com (GitHub Pages)에서 내려받습니다. 이때 일반적인 접속 기록(IP 주소, 접속 시각 등)이 호스팅 사업자에 남을 수 있습니다. 앱은 내 번호나 설정을 이 서버로 보내지 않습니다.</p>
+<h2>3-1. 알림 (Firebase Cloud Messaging)</h2>
+<p>구매 마감·추첨일 알림은 기기 안에서 예약됩니다. "당첨번호 발표" 알림은 Google Firebase Cloud Messaging(FCM)을 통해 받으며, 이를 위해 앱이 기기 식별 값(FCM 등록 토큰, Firebase 설치 ID)을 Google에 전달하고 "draw" 주제를 구독합니다. 이 값으로 이름·연락처 등 개인을 알아볼 수 없으며, 내 번호나 설정은 전달되지 않습니다. 알림은 앱 ⚙ 설정 또는 기기 설정에서 언제든 끌 수 있고, 허용하지 않아도 모든 기능을 쓸 수 있습니다.</p>
+<h2>3-2. 카메라 (QR 확인)</h2>
+<p>"QR확인" 기능은 로또 용지의 QR 코드를 읽기 위해 카메라를 사용합니다. 카메라 권한은 이 기능을 처음 쓸 때 묻고, 허용하지 않아도 다른 모든 기능을 쓸 수 있습니다. Android는 기기 안의 ML Kit, iOS는 Apple Vision으로 QR을 해석합니다. 촬영한 영상·사진은 저장하거나 서버로 전송하지 않으며, 읽은 번호는 이 기기의 "내 번호"에만 저장됩니다.</p>
+<h2>3-3. 위치 (내 주변 명당)</h2>
+<p>"내 주변" 기능은 사용자가 위치 권한을 허용했을 때 현재 위치(대략적 또는 정확한 위치)를 읽어 가까운 판매점을 계산하는 데만 사용합니다. 위치는 기기 안에서만 계산되며 서버로 전송하거나 저장하지 않습니다. 권한을 허용하지 않아도 다른 모든 기능을 쓸 수 있습니다. 앱 안 지도는 OpenStreetMap 타일 서버에서 지도 이미지를 받아오며, 이때 지도 조각 요청에 IP 주소 등 일반적인 접속 정보가 전달될 수 있습니다.</p>
+<h2>4. 광고 (Google AdMob)</h2>
+<p>앱에는 Google AdMob 광고(하단 배너, 앱 실행 시 전체화면 광고)가 표시됩니다. AdMob은 광고 제공·측정·부정 사용 방지를 위해 광고 식별자(광고 ID), IP 주소, 기기·앱 정보, 광고 상호작용 정보를 수집할 수 있으며, 이는 Google의 개인정보처리방침(policies.google.com/privacy)에 따라 처리됩니다. 유럽 경제 지역·영국 등 필요한 지역에서는 광고 동의 화면(Google UMP)으로 동의를 받고, iOS에서는 추적 허용(ATT) 여부를 묻습니다. 동의를 거부하거나 추적을 허용하지 않으면 개인 맞춤이 아닌 광고가 표시될 수 있습니다. 설정(⚙)의 "광고 개인정보 설정"(해당 지역)이나 기기의 광고 ID 설정에서 변경·재설정할 수 있습니다.</p>
+<h2>5. 고지</h2>
+<p>이 앱은 동행복권과 관련 없는 비공식 앱이며, 복권 구매 대행·결제 기능이 없습니다. 추천 번호는 당첨을 보장하지 않으며 통계는 참고용입니다. 만 19세 미만은 복권을 구매할 수 없습니다.</p>
+<h2>6. 문의</h2>
+<p>운영자: 이메지(imeji) · imejikr@gmail.com</p>
+</div>
+<div class="card"><h2>English summary</h2><p>Lotto Number Recommender has no accounts and does not collect or transmit personal data. Saved numbers and settings stay on your device. Winning numbers are downloaded from lotto.imeji.com. Weekly reminders are scheduled locally. Ads are served by Google AdMob (banner and app-open ads) with consent via Google UMP and ATT on iOS; AdMob may collect the advertising ID, IP address and device information. Push notifications use Firebase Cloud Messaging (installation ID / FCM token). This is an unofficial app, not affiliated with the lottery operator; it does not sell or buy tickets and does not guarantee any result.</p></div>
+</main></body></html>

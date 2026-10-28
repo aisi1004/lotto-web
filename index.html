@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2f4f6">
+<title>로또번호발생기 - 회차별 당첨번호 통계 분석</title>
+<meta name="description" content="로또 6/45 전 회차 당첨번호 통계, 번호 추천, 내 번호 자동 당첨 확인">
+<script>try{if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())document.documentElement.classList.add('native')}catch(e){}</script>
+<style>
+:root{--bg:#f2f4f6;--card:#fff;--ink:#191f28;--ink2:#4e5968;--sub:#8b95a1;--line:#eceff2;--blue:#3182f6;--bluebg:#e8f3ff;--up:#f04452;--ok:#03b26c;--warnbg:#fff4e0;--warn:#8a5200}
+@media(prefers-color-scheme:dark){:root{--bg:#101012;--card:#17171c;--ink:#f2f4f6;--ink2:#c3c9d1;--sub:#7e8590;--line:#2a2a31;--blue:#4593fc;--bluebg:#16253b;--up:#f66570;--warnbg:#2c2415;--warn:#f0c981}}
+html{overflow-anchor:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;letter-spacing:-.02em}
+button{font:inherit;color:inherit}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 0 calc(28px + env(safe-area-inset-bottom))}
+.hd{padding:22px 20px 6px;display:flex;align-items:flex-start;gap:8px}
+.native .hd{padding-top:calc(22px + env(safe-area-inset-top))}
+.hd .t{flex:1}.hd h1{font-size:22px;font-weight:700;margin:0}.hd p{margin:2px 0 0;color:var(--sub);font-size:13px}
+.hd button{border:0;background:var(--card);width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer}
+.sec{background:var(--card);border-radius:20px;margin:12px 16px;padding:20px}
+.sec h2{font-size:17px;font-weight:700;margin:0 0 4px}.sec .sub{font-size:13px;color:var(--sub);margin:0 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:var(--bg);color:var(--ink2);border-radius:99px;padding:8px 14px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--card);font-weight:600}
+.lab{font-size:12px;color:var(--sub);margin:16px 0 8px}
+.desc{font-size:13px;color:var(--ink2);background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.55}
+.go{width:100%;border:0;background:var(--blue);color:#fff;border-radius:16px;padding:17px;font-size:17px;font-weight:700;margin-top:18px;cursor:pointer}
+.go:active{transform:scale(.99)}
+.btn2{border:0;background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.btn2.pri{background:var(--bluebg);color:var(--blue)}
+.btn2.dng{color:var(--up)}
+.balls{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.b{flex:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;text-shadow:0 1px 1px #0003}
+.b.sm{width:28px;height:28px;font-size:12.5px}
+.b.mut{opacity:.28}
+.b.hit{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--ok)}
+.plus{color:var(--sub);font-weight:700;margin:0 1px}
+.pop{animation:pop .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.game{border-top:1px solid var(--line);padding:14px 0}.game:first-of-type{border-top:0}
+.gtop{display:flex;align-items:center;gap:8px;margin-bottom:8px}.gtop b{color:var(--blue);width:18px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:11.5px;background:var(--bg);color:var(--ink2);border-radius:8px;padding:3px 8px}
+.tag.g{background:#e3f7ee;color:#0a7d4b}.tag.w{background:var(--warnbg);color:var(--warn)}
+@media(prefers-color-scheme:dark){.tag.g{background:#13372a;color:#7ee0b0}}
+.acts{display:flex;gap:8px;margin-top:12px}.acts .btn2{flex:1}
+.note{font-size:12px;color:var(--sub);line-height:1.65;margin-top:12px}
+.warn{margin:12px 16px;background:var(--warnbg);color:var(--warn);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.cell{aspect-ratio:1;border:0;border-radius:50%;background:var(--bg);color:var(--ink2);font-weight:600;font-size:14px;cursor:pointer;position:relative;padding:0}
+.cell.fx{background:var(--blue);color:#fff}.cell.ex{background:#8b95a122;color:var(--sub);text-decoration:line-through}
+.cell.sel{color:#fff;text-shadow:0 1px 1px #0003}
+.nbar{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.nc{border:0;background:var(--bg);border-radius:12px;padding:6px 0 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.nc .b{width:26px;height:26px;font-size:12px}
+.nc i{font-style:normal;font-size:11px;color:var(--ink2);font-weight:600}
+.nc .bar{width:70%;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.nc .bar u{display:block;height:100%;background:var(--blue);border-radius:2px}
+.nc.hot{outline:2px solid var(--up)}.nc.cold{outline:2px solid var(--blue)}
+.hist{display:flex;align-items:flex-end;gap:5px;height:104px;margin-top:6px}
+.hist div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:10.5px;color:var(--sub);gap:3px}
+.hist u{display:block;width:100%;background:var(--blue);border-radius:5px 5px 0 0;min-height:2px;opacity:.85}
+.hist span{font-size:10px;white-space:nowrap}.hist em{font-style:normal;font-size:10px;color:var(--ink2);font-weight:600}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.kv div{background:var(--bg);border-radius:14px;padding:12px}.kv span{display:block;font-size:12px;color:var(--sub)}.kv b{font-size:18px}
+.rl{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}.rl:first-of-type{border-top:0}
+.rl .rn{width:46px;font-size:12px;color:var(--sub);flex:none}.rl .rm{margin-left:auto;font-size:11px;color:var(--sub);text-align:right;flex:none;line-height:1.35}
+.big{text-align:center;padding:6px 0 2px}.big .rd{font-size:13px;color:var(--sub)}.big .rt{font-size:20px;font-weight:700;margin:2px 0 14px}.big .balls{justify-content:center}.big .balls{gap:5px}.big .b{width:38px;height:38px;font-size:16px}.big .plus{margin:0}
+.prz{margin-top:16px;background:var(--bg);border-radius:14px;padding:6px 14px}.prz div{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-top:1px solid var(--line)}.prz div:first-child{border-top:0}.prz span{color:var(--sub)}
+.badge{font-size:11px;font-weight:700;border-radius:8px;padding:3px 8px;background:var(--bg);color:var(--sub)}
+.badge.r1,.badge.r2,.badge.r3{background:#ffe9e9;color:#d6303f}.badge.r4,.badge.r5{background:#e3f7ee;color:#0a7d4b}
+.cd{display:flex;align-items:baseline;gap:8px}.cd b{font-size:26px;letter-spacing:-.03em}.cd span{color:var(--sub);font-size:13px}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.pager button{border:0;background:var(--bg);width:38px;height:38px;border-radius:12px;font-size:16px;cursor:pointer}.pager button:disabled{opacity:.3}
+.pager .btn2{width:auto;height:38px;flex:1;margin:0 10px;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap}
+.empty{text-align:center;color:var(--sub);padding:26px 0;font-size:14px}
+.sheet{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:30}.sheet.on{display:flex}
+.sb{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:12px 20px calc(24px + env(safe-area-inset-bottom));animation:up .22s ease}
+@keyframes up{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sb h3{margin:0 0 4px;font-size:18px}.sb .sub{font-size:13px;color:var(--sub);margin:0 0 14px}
+.close{width:100%;border:0;background:var(--blue);color:#fff;border-radius:14px;padding:15px;font-weight:600;margin-top:16px;cursor:pointer}
+.close.gh{background:var(--bg);color:var(--ink2)}
+.row2{display:flex;gap:8px}.row2>*{flex:1}
+.sw{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}.sw:first-of-type{border-top:0}
+.sw small{display:block;color:var(--sub);font-size:12px}
+.tg{width:48px;height:28px;border-radius:99px;border:0;background:#c3c9d1;position:relative;cursor:pointer;flex:none}.tg::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}.tg.on{background:var(--blue)}.tg.on::after{left:23px}
+select,.in{width:100%;border:0;background:var(--bg);border-radius:12px;padding:12px 14px;font-size:16px;color:var(--ink)}
+button.lk,a.lk{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;border:0;background:var(--bg);color:var(--ink);border-radius:14px;padding:13px 14px;margin:8px 0;font-size:14px;text-align:left;text-decoration:none;cursor:pointer}
+button.lk span,a.lk span{color:var(--sub)}
+.sw small{display:block;color:var(--sub);font-size:12px}
+:root{--tabh:60px;--adh:50px}
+.adslot{display:none}
+.ad .adslot{display:block;position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);height:calc(var(--adh) + 10px);background:var(--bg);border-top:1px solid var(--line);z-index:9;pointer-events:none}
+.ad #app{padding-bottom:calc(var(--adh) + 10px + env(safe-area-inset-bottom,0px) + 40px)}
+.native body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:11}
+.tabs{position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 16px 10px;display:flex;gap:4px}
+.native .tabs{top:env(safe-area-inset-top,0px)}
+.native body::after{content:'';position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--bg);z-index:11;pointer-events:none}
+.tabs button{flex:1;min-width:0;border:0;background:var(--card);border-radius:12px;padding:9px 0;font-size:13.5px;color:var(--sub);cursor:pointer;white-space:nowrap}
+.tabs button b{font-size:10.5px;margin-right:2px;filter:grayscale(1);opacity:.6;font-weight:400}
+.tabs button.on{background:var(--ink);color:var(--card);font-weight:600}.tabs button.on b{filter:none;opacity:1}
+.ad .sheet{bottom:calc(var(--adh) + 10px + env(safe-area-inset-bottom,0px))}
+.hbs{display:flex;gap:4px}
+.hd .hb{width:48px;height:auto;border-radius:14px;padding:6px 0 4px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:19px;line-height:1.25}
+.hb small{font-size:10px;color:var(--sub);line-height:1.2}
+.bk{border:0;background:var(--card);width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;color:var(--ink)}
+.sub .tabs{display:none}
+.sub #app{padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+#nmap{height:400px;border-radius:16px;overflow:hidden;position:relative;z-index:0;isolation:isolate;background:var(--bg)}
+.mk b{display:flex;width:28px;height:28px;border-radius:50%;background:#f04452;color:#fff;font-size:12px;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px #0006;font-weight:700}
+.go:disabled{opacity:.6}
+#boot{display:none}
+.native #boot{display:flex;position:fixed;inset:0;z-index:99999;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:opacity .25s}
+.native #boot.out{opacity:0;pointer-events:none}
+#boot .bb{display:flex;gap:7px;margin-bottom:10px}
+#boot .bb i{font-style:normal;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px;text-shadow:0 1px 1px #0003}
+#boot h1{margin:0;font-size:24px}#boot p{margin:0;color:var(--sub);font-size:14px}
+#toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:#191f28e6;color:#fff;padding:11px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:50;max-width:88vw;text-align:center}
+.ad #toast{bottom:calc(var(--adh) + 50px + env(safe-area-inset-bottom))}
+#toast.on{opacity:1;transform:translateX(-50%)}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="boot"><div class="bb"><i style="background:#fbc400">7</i><i style="background:#69c8f2">14</i><i style="background:#ff7272">21</i><i style="background:#ff7272">28</i><i style="background:#aaa">35</i><i style="background:#b0d840">42</i></div><h1>로또번호발생기</h1><p>당첨번호 분석 · 번호 추천</p></div>
+<div class="adslot"></div>
+<div class="sheet" id="sheet"><div class="sb" id="sb"></div></div>
+<div id="toast"></div>
+<script src="lotto.js"></script>
+<script>
+(function(){
+'use strict';
+var L=window.Lotto, NATIVE=document.documentElement.classList.contains('native');
+var REMOTE='https://lotto.imeji.com/data/';
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return n<10?'0'+n:''+n}
+function won(n){return n==null?'-':n>=1e8?(Math.floor(n/1e6)/100).toLocaleString('ko-KR')+'억원':Math.round(n/1e4).toLocaleString('ko-KR')+'만원'}
+function wonFull(n){return n==null?'-':n.toLocaleString('ko-KR')+'원'}
+function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on')},2200)}
+function ball(n,cls){return '<span class="b '+(cls||'')+'" style="background:'+L.ballColor(n)+'">'+n+'</span>'}
+
+/* ---------- 상태 ---------- */
+var rows=[], latest=null, prizes={};
+var S=Object.assign({mode:'balance',games:5,win:30,fixed:[],exclude:[],range:30,sort:'num',bonus:false,tab:'win',n:null,rpage:1,sel:0},ls('lotto.s',{}));
+var FIRST=!(ls('lotto.s',{}).n||{}).asked;   // 처음 실행이면 앱 오프닝 광고를 건너뛴다
+S.n=Object.assign({deadline:true,deadMin:30,draw:true,remind:false,remindHour:17,exact:false,asked:false},S.n||{});
+var stores=null,storesLoading=false;   // 당첨 판매점(최근 10회)
+var mine=ls('lotto.mine',[]);        // {id,nums,round,mode,at}
+var result=null;                     // 마지막 추천 결과
+function save(){lsSet('lotto.s',{mode:S.mode,games:S.games,win:S.win,fixed:S.fixed,exclude:S.exclude,range:S.range,sort:S.sort,bonus:S.bonus,n:S.n})}
+function saveMine(){lsSet('lotto.mine',mine)}
+function lastRound(){return rows.length?rows[rows.length-1][0]:0}
+function nextRound(){return lastRound()+1}
+function drawOf(r){var x=rows[r-1];return x&&x[0]===r?L.draw(x):null}
+
+/* ---------- 데이터 ---------- */
+function getJson(u,ms){return new Promise(function(res,rej){var c=new AbortController(),t=setTimeout(function(){c.abort()},ms||8000);fetch(u,{signal:c.signal,cache:'no-cache'}).then(function(r){clearTimeout(t);if(!r.ok)throw new Error(r.status);return r.json()}).then(res,rej)})}
+function loadData(){
+  var cached=ls('lotto.cache',null);
+  var tasks=[getJson('data/draws.json').catch(function(){return null})];
+  if(NATIVE||location.hostname!=='lotto.imeji.com') tasks.push(getJson(REMOTE+'draws.json',6000).catch(function(){return null}));
+  return Promise.all(tasks).then(function(rs){
+    var best=cached;
+    rs.forEach(function(r){if(r&&r.rows&&r.rows.length&&(!best||r.rows.length>best.rows.length))best=r});
+    if(!best)throw new Error('data');
+    if(best!==cached)try{localStorage.setItem('lotto.cache',JSON.stringify(best))}catch(e){}
+    rows=best.rows;
+    return getJson('data/latest.json').catch(function(){return null}).then(function(l){
+      var r2=(NATIVE||location.hostname!=='lotto.imeji.com')?getJson(REMOTE+'latest.json',6000).catch(function(){return null}):Promise.resolve(null);
+      return r2.then(function(rl){var use=(rl&&(!l||rl.round>=l.round))?rl:l;if(use){latest=use;prizes=use.prizeByRound||{}}})
+    });
+  });
+}
+
+function loadStores(){
+  if(storesLoading)return;storesLoading=true;
+  var tasks=[getJson('data/stores.json').catch(function(){return null})];
+  if(NATIVE||location.hostname!=='lotto.imeji.com')tasks.push(getJson(REMOTE+'stores.json',6000).catch(function(){return null}));
+  Promise.all(tasks).then(function(rs){
+    var best=null;rs.forEach(function(r){if(r&&r.rounds&&(!best||Object.keys(r.rounds).length>=Object.keys(best.rounds).length))best=r});
+    stores=best||{rounds:{}};storesLoading=false;if(S.tab==='win')render();
+  });
+}
+
+/* ---------- 화면 ---------- */
+var TABS=[['win','🏆','당첨'],['ana','📊','분석'],['rec','🎯','추천'],['myeong','🍀','명당'],['mine','📒','내 번호']];
+var HOME='win';   // 첫 번째 메뉴가 시작 화면(뒤로가기도 여기로 돌아온다)
+function renderTabs(){return '<div class="tabs">'+TABS.map(function(t){return '<button data-t="'+t[0]+'" class="'+(S.tab===t[0]?'on':'')+'"><b>'+t[1]+'</b>'+t[2]+'</button>'}).join('')+'</div>'}
+function ddayShort(){
+  var ms=L.nextDraw(new Date())-Date.now(),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
+  if(ms<0)return '추첨 진행 중';
+  return d>0?d+'일 '+h+'시간 남음':h+'시간 '+Math.floor(ms%36e5/6e4)+'분 남음';
+}
+function dday(){
+  var nd=L.nextDraw(new Date()),ms=nd-Date.now(),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
+  if(ms<0)return '추첨 진행 중';
+  return d>0?'추첨까지 '+d+'일 '+h+'시간':'추첨까지 '+h+'시간 '+Math.floor(ms%36e5/6e4)+'분';
+}
+function header(){
+  return '<div class="hd"><div class="t"><h1>로또번호발생기</h1><p>제 '+nextRound()+'회 · '+ddayShort()+'</p></div><div class="hbs">'+
+    '<button class="hb" data-a="qr" aria-label="용지 QR로 당첨 확인"><span>📷</span><small>QR확인</small></button>'+
+        '<button class="hb" data-a="settings" aria-label="설정"><span>⚙️</span><small>설정</small></button></div></div>';
+}
+var SUBS={settings:{title:'설정',view:function(){return '<div class="sec" style="margin-top:4px">'+vSet()+'</div>'}}};
+function render(){
+  var y=window.pageYOffset||0,SB=SUBS[S.tab];
+  document.documentElement.classList.toggle('sub',!!SB);
+  if(SB){$('#app').innerHTML='<div class="hd"><button class="bk" data-a="back" aria-label="뒤로">←</button><div class="t"><h1>'+SB.title+'</h1></div></div>'+SB.view();if(y)window.scrollTo(0,y);adSync();afterRender();return}
+  var h=header()+renderTabs();
+  if(!rows.length){$('#app').innerHTML=h+'<div class="empty">당첨번호를 불러오지 못했어요.<br>네트워크를 확인하고 다시 열어 주세요.</div>';adSync();return}
+  h+=({rec:vRec,ana:vAna,mine:vMine,win:vWin,myeong:vMyeong})[S.tab]();
+  $('#app').innerHTML=h;
+  if(y)window.scrollTo(0,y);
+  adSync();afterRender();
+}
+function afterRender(){if(S.tab==='myeong'&&MY.mode==='near'&&NR.view==='map'&&NR.pos)mountMap()}
+
+/* --- 추천 --- */
+function tagsOf(nums){
+  var d=L.describe(rows,nums),t=[];
+  t.push('<span class="tag">합계 '+d.sum+'</span>','<span class="tag">홀 '+d.odd+' : 짝 '+d.even+'</span>','<span class="tag">'+d.zones+'개 구간</span>');
+  if(d.consec)t.push('<span class="tag">연속 '+d.consec+'쌍</span>');
+  t.push(d.balanced?'<span class="tag g">균형 조건 ✓</span>':'<span class="tag w">균형 조건 밖</span>');
+  if(d.bestMatch>=3)t.push('<span class="tag">과거 '+d.bestRound+'회와 '+d.bestMatch+'개 일치</span>');
+  return '<div class="tags">'+t.join('')+'</div>';
+}
+function vRec(){
+  var m=L.MODES, h='<div class="sec"><h2>번호 뽑기</h2><p class="sub">고르는 방식을 정하고 버튼을 눌러요.</p>';
+  h+='<div class="chips">'+Object.keys(m).map(function(k){return '<button class="chip '+(S.mode===k?'on':'')+'" data-mode="'+k+'">'+m[k].name+'</button>'}).join('')+'</div>';
+  h+='<div class="desc">'+m[S.mode].desc+'</div>';
+  h+='<div class="lab">게임 수</div><div class="chips">'+[1,2,3,4,5].map(function(n){return '<button class="chip '+(S.games===n?'on':'')+'" data-games="'+n+'">'+n+'게임</button>'}).join('')+'</div>';
+  if(S.mode==='hot'||S.mode==='cold'||S.mode==='mix'){
+    h+='<div class="lab">기준 기간</div><div class="chips">'+[10,30,50,100].map(function(n){return '<button class="chip '+(S.win===n?'on':'')+'" data-win="'+n+'">최근 '+n+'회</button>'}).join('')+'</div>';
+  }
+  var fx=S.fixed.length,ex=S.exclude.length;
+  h+='<div class="lab">내가 정하기</div><button class="btn2" data-a="pick" style="width:100%;text-align:left">'+(fx||ex?('고정 '+(fx?S.fixed.join(', '):'없음')+' · 제외 '+(ex?S.exclude.join(', '):'없음')):'꼭 넣을 번호 / 빼고 싶은 번호 정하기')+'</button>';
+  h+='<button class="go" data-a="go">번호 뽑기</button></div>';
+  if(result){
+    h+='<div class="sec"><h2>추천 번호</h2><p class="sub">'+m[result.mode].name+' · 제 '+result.round+'회용</p>';
+    result.games.forEach(function(g,i){
+      h+='<div class="game"><div class="gtop"><b>'+'ABCDE'[i]+'</b><div class="balls">'+g.nums.map(function(n,j){return '<span class="b pop" style="background:'+L.ballColor(n)+';animation-delay:'+(j*70)+'ms">'+n+'</span>'}).join('')+'</div></div>'+tagsOf(g.nums)+(g.relaxed?'<div class="note">고정한 번호가 많아 균형 조건은 적용하지 못했어요.</div>':'')+
+        '<div class="acts"><button class="btn2 pri" data-save="'+i+'">내 번호에 저장</button></div></div>';
+    });
+    h+='<div class="acts"><button class="btn2" data-a="saveall">전부 저장</button><button class="btn2" data-a="share">공유</button></div></div>';
+  }
+  var share=Math.round(L.balanceShare(rows)*100);
+  h+='<div class="warn">⚠️ 어떤 번호든 1등 확률은 똑같이 약 814만분의 1이에요. 이 앱의 추천은 번호를 고르는 방식을 바꿔 주는 것이지 당첨을 높여 주지 않아요. 균형 조건(홀짝 2~4개·합계 100~175·3구간 이상·연속 1쌍 이하)은 역대 당첨 조합의 '+share+'%가 해당하는 모양이에요. 과도한 구매는 삼가세요.</div>';
+  return h;
+}
+
+/* --- 분석 --- */
+function hist(items,fmt){
+  var mx=Math.max.apply(null,items.map(function(i){return i.v}))||1;
+  return '<div class="hist">'+items.map(function(i){return '<div><em>'+i.v+'</em><u style="height:'+Math.max(2,Math.round(i.v/mx*70))+'px"></u><span>'+i.l+'</span></div>'}).join('')+'</div>';
+}
+function vAna(){
+  var to=lastRound(),from=S.range?to-S.range+1:1,st=L.stats(rows,from,to,S.bonus);
+  var h='<div class="sec"><h2>당첨번호 분석</h2><p class="sub">제 '+st.from+'~'+st.to+'회 · '+st.count+'회차</p><div class="chips">';
+  [10,30,50,100,0].forEach(function(n){h+='<button class="chip '+(S.range===n?'on':'')+'" data-range="'+n+'">'+(n?'최근 '+n+'회':'전체')+'</button>'});
+  h+='</div><div class="lab">옵션</div><div class="chips"><button class="chip '+(S.bonus?'on':'')+'" data-a="bonus">보너스 번호 포함</button></div></div>';
+
+  var rk=L.ranked(st.freq),hot={},cold={};
+  rk.slice(0,5).forEach(function(x){hot[x.n]=1});rk.slice(-5).forEach(function(x){cold[x.n]=1});
+  var order=[];for(var n=1;n<=45;n++)order.push(n);
+  if(S.sort==='hot')order=rk.map(function(x){return x.n});
+  if(S.sort==='gap')order.sort(function(a,b){return st.gap[b]-st.gap[a]||a-b});
+  var mx=rk[0].v||1;
+  h+='<div class="sec"><h2>번호별 출현 횟수</h2><p class="sub">빨간 테두리: 가장 많이 나온 5개 · 파란 테두리: 가장 적게 나온 5개. 눌러서 자세히 봐요.</p>';
+  h+='<div class="chips" style="margin-bottom:12px">'+[['num','번호순'],['hot','많이 나온 순'],['gap','오래 안 나온 순']].map(function(s){return '<button class="chip '+(S.sort===s[0]?'on':'')+'" data-sort="'+s[0]+'">'+s[1]+'</button>'}).join('')+'</div>';
+  h+='<div class="nbar">'+order.map(function(n){var v=S.sort==='gap'?st.gap[n]+'회전':st.freq[n];return '<button class="nc '+(hot[n]?'hot':cold[n]?'cold':'')+'" data-num="'+n+'">'+ball(n)+'<i>'+v+'</i><span class="bar"><u style="width:'+Math.round(st.freq[n]/mx*100)+'%"></u></span></button>'}).join('')+'</div></div>';
+
+  var ordGap=L.ranked(st.gap).slice(0,5);
+  h+='<div class="sec"><h2>가장 오래 안 나온 번호</h2><p class="sub">마지막으로 나온 뒤 지난 회차 수예요. 오래 안 나왔다고 곧 나온다는 뜻은 아니에요.</p>'+
+    ordGap.map(function(x){return '<div class="rl" data-num="'+x.n+'">'+ball(x.n)+'<span>'+x.v+'회째 미출현</span><span class="rm">마지막 '+(st.last[x.n]?st.last[x.n]+'회':'기간 내 없음')+'</span></div>'}).join('')+'</div>';
+
+  var od=[];for(var o=6;o>=0;o--)od.push({l:o+':'+(6-o),v:st.oddDist[o]});
+  h+='<div class="sec"><h2>홀수 : 짝수</h2><p class="sub">한 회차 6개 번호의 홀짝 구성(횟수)</p>'+hist(od)+'</div>';
+  var zn=L.ZONE_NAMES.map(function(z,i){return{l:z,v:st.zoneTotal[i]}});
+  h+='<div class="sec"><h2>구간별 출현</h2><p class="sub">번호가 속한 구간별 총 출현 수. 구간 크기가 달라(41~45는 5개) 평균이 달라요.</p>'+hist(zn)+'</div>';
+  var keys=Object.keys(st.sumHist).map(Number).sort(function(a,b){return a-b});
+  h+='<div class="sec"><h2>번호 합계 분포</h2><p class="sub">6개 번호 합계를 20 단위로 묶은 횟수</p>'+hist(keys.map(function(k){return{l:k,v:st.sumHist[k]}}))+'</div>';
+  h+='<div class="sec"><h2>모양 요약</h2><div class="kv"><div><span>연속 번호가 있던 회차</span><b>'+(st.count?Math.round(st.consecRows/st.count*100):0)+'%</b></div><div><span>균형 조건에 맞은 회차</span><b>'+Math.round(L.balanceShare(st.rows)*100)+'%</b></div></div></div>';
+
+  var list=st.rows.slice().reverse(),per=15,pages=Math.max(1,Math.ceil(list.length/per)),pg=Math.min(S.rpage,pages);
+  h+='<div class="sec"><h2>회차별 당첨번호</h2><p class="sub">합계 / 홀짝도 같이 보여요.</p>';
+  list.slice((pg-1)*per,pg*per).forEach(function(r){var d=L.draw(r);h+='<div class="rl" data-round="'+d.round+'"><span class="rn">'+d.round+'회</span><div class="balls">'+d.nums.map(function(n){return ball(n,'sm')}).join('')+'<span class="plus">+</span>'+ball(d.bonus,'sm')+'</div><span class="rm">합 '+L.sum(d.nums)+'<br>'+L.oddCount(d.nums)+':'+(6-L.oddCount(d.nums))+'</span></div>'});
+  h+='<div class="pager" style="margin-top:12px"><button data-pg="-1" '+(pg<=1?'disabled':'')+'>‹</button><span style="font-size:13px;color:var(--sub)">'+pg+' / '+pages+'</span><button data-pg="1" '+(pg>=pages?'disabled':'')+'>›</button></div></div>';
+  h+='<div class="note" style="margin:4px 24px 0">통계는 지난 당첨 결과를 센 것이에요. 많이 나왔거나 오래 안 나왔다고 앞으로 더 나온다는 뜻은 아니에요.</div>';
+  return h;
+}
+
+/* --- 내 번호 --- */
+function badge(rk){return rk?'<span class="badge r'+rk+'">'+rk+'등</span>':'<span class="badge">낙첨</span>'}
+function vMine(){
+  var h='<div class="sec"><h2>내 번호</h2><p class="sub">저장한 번호는 이 기기에만 보관돼요. 추첨 결과가 나오면 자동으로 맞춰 봐요.</p><div class="acts" style="margin-top:0"><button class="btn2 pri" data-a="add">직접 입력</button><button class="btn2" data-a="export">복사</button></div></div>';
+  if(!mine.length)return h+'<div class="sec"><div class="empty">저장한 번호가 없어요.<br>추천 탭에서 저장하거나 직접 입력해 보세요.</div></div>';
+  var by={};mine.forEach(function(m){(by[m.round]=by[m.round]||[]).push(m)});
+  var rounds=Object.keys(by).map(Number).sort(function(a,b){return b-a});
+  var won=0,played=0;
+  rounds.forEach(function(r){
+    var d=drawOf(r);
+    h+='<div class="sec"><h2>제 '+r+'회 '+(d?'':'<span class="badge">추첨 전</span>')+'</h2><p class="sub">'+(d?d.date+' 추첨 · 당첨번호 '+d.nums.join(' ')+' + '+d.bonus:'다음 토요일 20:35 추첨')+'</p>';
+    by[r].forEach(function(m){
+      var c=d?L.check(m.nums,d):null;if(c){played++;if(c.rank)won++}
+      h+='<div class="game"><div class="gtop"><div class="balls">'+m.nums.map(function(n){var hit=c&&(c.hit.indexOf(n)>=0||(c.bonus&&n===d.bonus));return '<span class="b sm '+(hit?'hit':(c?'mut':''))+'" style="background:'+L.ballColor(n)+'">'+n+'</span>'}).join('')+'</div><span style="margin-left:auto">'+(c?badge(c.rank):'')+'</span></div>'+
+        '<div class="tags">'+(c?'<span class="tag">'+c.match+'개 일치'+(c.bonus?' + 보너스':'')+'</span>':'')+'<span class="tag">'+(m.mode==='manual'?'직접 입력':m.mode==='qr'?'용지 QR':(L.MODES[m.mode]||{name:''}).name)+'</span><button class="tag" style="border:0;cursor:pointer;color:var(--up)" data-del="'+m.id+'">삭제</button></div></div>';
+    });
+    h+='</div>';
+  });
+  if(played)h=h.replace('<div class="acts" style="margin-top:0">','<div class="note" style="margin:0 0 12px">맞춰 본 '+played+'게임 중 5등 이상 '+won+'게임</div><div class="acts" style="margin-top:0">');
+  return h;
+}
+
+/* --- 당첨 판매점 --- */
+function storeRow(r,i,x){return '<div class="rl" data-store="'+r+':'+i+'"><span class="rn" style="width:auto;flex:1;color:var(--ink);font-size:14px;font-weight:600;line-height:1.35">'+esc(x[0])+'<br><span style="color:var(--sub);font-weight:400;font-size:12px">'+esc(x[1])+'</span></span><span class="rm">'+(x[3]===1?'자동':x[3]===0?'수동':'반자동')+'<br>지도 ›</span></div>'}
+function storeBlock(r){
+  if(!stores){loadStores();return '<div class="lab">당첨 판매점</div><div class="note" style="margin-top:0">불러오는 중…</div>'}
+  var list=stores.rounds&&stores.rounds[r];
+  if(!list)return '<div class="lab">당첨 판매점</div><div class="note" style="margin-top:0">당첨 판매점은 최근 10회차만 보여요.</div>';
+  if(!list.length)return '<div class="lab">당첨 판매점</div><div class="note" style="margin-top:0">판매점 정보가 아직 올라오지 않았어요. 추첨 후 몇 시간 뒤에 나와요.</div>';
+  var one=[],two=[];list.forEach(function(x,i){(x[2]===1?one:two).push([x,i])});
+  var h='<div class="lab">1등 당첨 판매점 ('+one.length+'곳) · 누르면 지도</div>';
+  h+=one.map(function(p){return storeRow(r,p[1],p[0])}).join('')||'<div class="note" style="margin-top:0">1등 판매점이 없어요.</div>';
+  if(two.length){
+    h+='<button class="btn2" data-a="two" style="width:100%;margin-top:10px">'+(S.show2?'2등 판매점 접기':'2등 판매점 '+two.length+'곳 보기')+'</button>';
+    if(S.show2)h+=two.map(function(p){return storeRow(r,p[1],p[0])}).join('');
+  }
+  return h;
+}
+function storeSheet(r,i){
+  var x=stores&&stores.rounds&&stores.rounds[r]&&stores.rounds[r][i];if(!x)return;
+  var q=encodeURIComponent(x[0]),lat=x[4],lon=x[5];
+  openSheet('<h3>'+esc(x[0])+'</h3><p class="sub">'+esc(x[1])+'</p><div class="tags" style="margin:0 0 6px"><span class="tag">제 '+r+'회 '+x[2]+'등</span><span class="tag">'+(x[3]===1?'자동':x[3]===0?'수동':'반자동')+'</span><span class="tag">'+esc(x[6])+'</span></div>'+
+    '<button class="lk" data-url="https://map.kakao.com/link/map/'+q+','+lat+','+lon+'">카카오맵으로 보기<span>›</span></button>'+
+    '<button class="lk" data-url="https://map.naver.com/p/search/'+encodeURIComponent(x[1]+' '+x[0])+'">네이버지도로 보기<span>›</span></button>'+
+    '<button class="lk" data-url="https://www.google.com/maps/search/?api=1&query='+lat+','+lon+'">구글지도로 보기<span>›</span></button>'+
+    '<button class="lk" data-copy="'+esc(x[1])+'">주소 복사<span>›</span></button>'+
+    '<div class="note">당첨 판매점 정보는 동행복권 공개 자료예요. 폐업·이전했을 수 있어요.</div><button class="close" data-a="x">닫기</button>');
+}
+
+/* --- 당첨 --- */
+function vWin(){
+  var r=S.sel||lastRound(),d=drawOf(r)||drawOf(lastRound()),h='';
+  r=d.round;
+  var nd=L.nextDraw(new Date());
+  h+='<div class="sec"><h2>다음 추첨</h2><div class="cd"><b>제 '+nextRound()+'회</b><span>'+dday()+' · 토 20:35</span></div></div>';
+  h+='<div class="sec"><div class="pager"><button data-rd="-1" '+(r<=1?'disabled':'')+'>‹</button><button class="btn2" data-a="goround">회차 선택</button><button data-rd="1" '+(r>=lastRound()?'disabled':'')+'>›</button></div>';
+  h+='<div class="big"><div class="rd">'+d.date+' 추첨</div><div class="rt">제 '+r+'회 당첨번호</div><div class="balls">'+d.nums.map(function(n){return ball(n)}).join('')+'<span class="plus">+</span>'+ball(d.bonus)+'</div></div>';
+  var p=(prizes[r])||(latest&&latest.round===r?latest.prize:null);
+  if(p)h+='<div class="prz"><div><span>1등</span><b>'+p.w1+'명 · '+won(p.a1)+'</b></div><div><span>2등</span><b>'+p.w2+'명 · '+won(p.a2)+'</b></div><div><span>3등</span><b>'+p.w3.toLocaleString('ko-KR')+'명 · '+wonFull(p.a3)+'</b></div><div><span>4등 / 5등</span><b>5만원 / 5천원</b></div></div>';
+  else h+='<div class="note" style="text-align:center">이 회차의 당첨금 정보는 최근 30회만 보여요.</div>';
+  h+=storeBlock(r);
+  var my=mine.filter(function(m){return m.round===r});
+  if(my.length)h+='<div class="lab">내 번호 결과</div>'+my.map(function(m){var c=L.check(m.nums,d);return '<div class="rl" style="cursor:default"><div class="balls">'+m.nums.map(function(n){return '<span class="b sm '+(c.hit.indexOf(n)>=0||(c.bonus&&n===d.bonus)?'hit':'mut')+'" style="background:'+L.ballColor(n)+'">'+n+'</span>'}).join('')+'</div><span class="rm">'+badge(c.rank)+'</span></div>'}).join('');
+  h+='</div><div class="sec"><h2>최근 당첨번호</h2>';
+  rows.slice(-12).reverse().forEach(function(x){var e=L.draw(x);h+='<div class="rl" data-round="'+e.round+'"><span class="rn">'+e.round+'회</span><div class="balls">'+e.nums.map(function(n){return ball(n,'sm')}).join('')+'<span class="plus">+</span>'+ball(e.bonus,'sm')+'</div></div>'});
+  h+='</div>';
+  return h;
+}
+
+/* ---------- 시트 ---------- */
+function openSheet(html){$('#sb').innerHTML='<div class="grab"></div>'+html;$('#sheet').classList.add('on')}
+function closeSheet(){$('#sheet').classList.remove('on')}
+
+var tmp={fixed:[],exclude:[]};
+function pickSheet(){
+  tmp.fixed=S.fixed.slice();tmp.exclude=S.exclude.slice();
+  openSheet('<h3>내가 정하기</h3><p class="sub">번호를 한 번 누르면 <b style="color:var(--blue)">꼭 넣기</b>, 두 번 누르면 <b>빼기</b>, 세 번 누르면 해제예요. 꼭 넣을 번호는 최대 5개.</p><div class="grid" id="pg"></div><div class="row2" style="margin-top:16px"><button class="close gh" data-a="pickclear">모두 해제</button><button class="close" data-a="pickok">적용</button></div>');
+  drawPick();
+}
+function drawPick(){
+  var h='';for(var n=1;n<=45;n++){var c=tmp.fixed.indexOf(n)>=0?'fx':tmp.exclude.indexOf(n)>=0?'ex':'';h+='<button class="cell '+c+'" data-p="'+n+'">'+n+'</button>'}
+  $('#pg').innerHTML=h;
+}
+var man={nums:[],round:0};
+function manualSheet(){
+  man.nums=[];man.round=nextRound();
+  var opts='';for(var r=nextRound();r>=Math.max(1,nextRound()-10);r--)opts+='<option value="'+r+'">제 '+r+'회'+(r===nextRound()?' (다음 추첨)':'')+'</option>';
+  openSheet('<h3>번호 직접 입력</h3><p class="sub">구매한 번호 6개를 눌러 주세요. <span id="mc">0</span>/6</p><div class="grid" id="mg"></div><div class="lab">회차</div><select id="mr">'+opts+'</select><div class="row2" style="margin-top:16px"><button class="close gh" data-a="x">닫기</button><button class="close" data-a="manok">저장</button></div>');
+  drawMan();
+}
+function drawMan(){
+  var h='';for(var n=1;n<=45;n++){var on=man.nums.indexOf(n)>=0;h+='<button class="cell '+(on?'sel':'')+'" '+(on?'style="background:'+L.ballColor(n)+'"':'')+' data-m="'+n+'">'+n+'</button>'}
+  $('#mg').innerHTML=h;$('#mc').textContent=man.nums.length;
+}
+function numSheet(n){
+  var st=L.numberDetail(rows,n),f=st.count/Math.max(1,lastRound()),avg=lastRound()*6/45;
+  openSheet('<h3 style="display:flex;align-items:center;gap:10px">'+ball(n)+' '+n+'번</h3><p class="sub">전체 '+lastRound()+'회 기준</p><div class="kv"><div><span>총 출현</span><b>'+st.count+'회</b></div><div><span>보너스로 출현</span><b>'+st.bonus+'회</b></div><div><span>마지막 출현</span><b>'+(st.last?st.last+'회':'-')+'</b></div><div><span>지금까지 쉰 기간</span><b>'+st.since+'회</b></div><div><span>평균 출현 간격</span><b>'+st.avgGap.toFixed(1)+'회</b></div><div><span>가장 길게 쉰 기간</span><b>'+st.maxGap+'회</b></div></div><div class="lab">자리별 출현 (번호를 작은 순으로 놓았을 때)</div>'+hist(st.pos.map(function(v,i){return{l:(i+1)+'번째',v:v}}))+'<div class="note">전체 평균 출현은 번호당 약 '+avg.toFixed(0)+'회예요. 차이는 우연으로 생기는 범위의 흔들림이에요.</div><button class="close" data-a="x">닫기</button>');
+}
+function roundSheet(){
+  openSheet('<h3>회차 선택</h3><p class="sub">1 ~ '+lastRound()+'회</p><input class="in" id="ri" type="number" inputmode="numeric" min="1" max="'+lastRound()+'" placeholder="회차 번호"><div class="row2" style="margin-top:16px"><button class="close gh" data-a="x">닫기</button><button class="close" data-a="rok">보기</button></div>');
+}
+var SITE='https://lotto.imeji.com/';
+function PL(n){try{return window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins[n]}catch(e){return null}}
+function openUrl(u){var B=PL('Browser');if(B&&NATIVE){B.open({url:u});return}window.open(u,'_blank')}
+function permState(){var FM=PL('FirebaseMessaging');if(!NATIVE||!FM)return Promise.resolve('web');return FM.checkPermissions().then(function(p){return p.receive},function(){return 'unknown'})}
+function askPerm(){var FM=PL('FirebaseMessaging');if(!FM)return Promise.resolve(false);return FM.requestPermissions().then(function(p){return p.receive==='granted'},function(){return false})}
+/* 켜 둔 알림 옵션을 기기에 반영한다: 구매 마감·번호 알림은 기기 안 예약(서버 불필요), 당첨번호 발표는 FCM 주제(draw) 구독 */
+function applyNotifs(){
+  if(!NATIVE)return Promise.resolve();
+  var LN=PL('LocalNotifications'),FM=PL('FirebaseMessaging'),n=S.n,jobs=[];
+  if(LN){
+    var list=[];
+    if(n.deadline){var t=20*60-n.deadMin;list.push({id:7101,title:'로또 구매 마감 '+n.deadMin+'분 전',body:'토요일 저녁 8시에 판매가 마감돼요. 번호는 정하셨나요?',channelId:'deadline',isExactNotification:!!n.exact,schedule:{on:{weekday:7,hour:Math.floor(t/60),minute:t%60},allowWhileIdle:true}})}
+    if(n.remind)list.push({id:7102,title:'오늘은 로또 추첨일이에요',body:'저장한 번호가 있는지 확인해 보세요.',channelId:'deadline',isExactNotification:!!n.exact,schedule:{on:{weekday:7,hour:n.remindHour,minute:0},allowWhileIdle:true}});
+    jobs.push(LN.cancel({notifications:[{id:7101},{id:7102}]}).then(function(){return list.length?LN.schedule({notifications:list}):null}).catch(function(){}));
+  }
+  if(FM)jobs.push((n.draw?FM.subscribeToTopic({topic:'draw'}):FM.unsubscribeFromTopic({topic:'draw'})).catch(function(){}));
+  return Promise.all(jobs);
+}
+var lastBack=0;
+function nativeSplashOff(){var SP=PL('SplashScreen');if(NATIVE&&SP&&SP.hide)setTimeout(function(){try{SP.hide({fadeOutDuration:60}).catch(function(){})}catch(e){}},80)}
+function initBack(){
+  var AP=PL('App');if(!NATIVE||!AP||!AP.addListener)return;
+  AP.addListener('backButton',function(){
+    if(SUBS[S.tab]){S.tab=S.prev||HOME;render();window.scrollTo(0,0);return}
+    if($('#sheet').classList.contains('on')){closeSheet();return}          // 열린 창이 있으면 닫기
+    if(S.tab!==HOME){S.tab=HOME;S.rpage=1;render();window.scrollTo(0,0);return}   // 다른 탭이면 첫 메뉴(당첨)로
+    if(Date.now()-lastBack<2000){AP.exitApp();return}                        // 추천 탭에서 두 번 누르면 종료
+    lastBack=Date.now();toast('한 번 더 누르면 앱이 종료돼요');
+  });
+}
+function initNotifs(){
+  if(!NATIVE)return;
+  var LN=PL('LocalNotifications'),FM=PL('FirebaseMessaging');
+  try{if(LN&&LN.createChannel)LN.createChannel({id:'deadline',name:'구매 마감·추첨일 알림',importance:4})}catch(e){}
+  try{if(FM&&FM.createChannel)FM.createChannel({id:'draw',name:'당첨번호 발표',importance:4})}catch(e){}
+  try{if(FM&&FM.addListener){
+    FM.addListener('notificationReceived',function(e){var m=e&&e.notification;if(m&&(m.title||m.body))toast((m.title||'')+(m.body?' · '+m.body:''));loadData().then(render,function(){})});
+    FM.addListener('notificationActionPerformed',function(){S.tab='win';S.sel=0;loadData().then(render,function(){render()})});
+  }}catch(e){}
+  if(!S.n.asked){                 // 처음 실행: 시스템 알림 권한 팝업
+    S.n.asked=true;save();
+    askPerm().then(function(ok){if(ok){applyNotifs();toast('알림을 켰어요 · ⚙ 설정에서 바꿀 수 있어요')}});
+  }else permState().then(function(st){if(st==='granted')applyNotifs()});
+}
+
+/* ---------- 광고(AdMob): 하단 배너 + 앱 오프닝 ---------- */
+/* 기본은 구글 테스트 광고. 실제 단위 ID 는 public/ads.json 에 넣고 test:false 로 바꾼다. 동의(UMP)·iOS 추적 허용을 받은 뒤에만 광고를 요청한다. */
+var AD={cfg:null,inited:null,banner:false,openAt:+ls('lotto.adOpenAt',0)||0,hiddenAt:Date.now(),privacy:false};
+var AD_TEST={android:{banner:'ca-app-pub-3940256099942544/6300978111',appOpen:'ca-app-pub-3940256099942544/9257395921'},ios:{banner:'ca-app-pub-3940256099942544/2934735716',appOpen:'ca-app-pub-3940256099942544/5575463023'}};
+var AD_GAP=20*60*1000,AD_BG=30*60*1000;
+function adPlat(){try{return Capacitor.getPlatform()==='ios'?'ios':'android'}catch(e){return 'android'}}
+function adUnit(kind){var c=AD.cfg||{},p=adPlat();return c.test?AD_TEST[p][kind]:((c[p]||{})[kind]||'')}
+function adCfg(){
+  return getJson('ads.json').catch(function(){return null}).then(function(c){
+    return getJson(SITE+'ads.json',5000).catch(function(){return null}).then(function(rc){return rc||c||{enabled:true,test:true}});
+  });
+}
+function testBuild(){        // 패키지 이름이 .test 로 끝나는 시험용 빌드인가
+  var A=PL('App');
+  if(!A||!A.getInfo)return Promise.resolve(false);
+  return A.getInfo().then(function(i){return /\.test$/.test(String(i&&i.id||''))},function(){return false});
+}
+function adInit(){
+  if(AD.inited)return AD.inited;
+  var A=PL('AdMob');
+  if(!NATIVE||!A)return (AD.inited=Promise.resolve(false));
+  AD.inited=adCfg().then(function(cfg){
+    return testBuild().then(function(tb){
+      if(tb||ls('lotto.testAds',0)===1)cfg.test=true;   // 내 테스트 빌드이거나, 이 기기에서 테스트 광고 모드를 켠 경우 → 구글 테스트 광고
+      return cfg;
+    });
+  }).then(function(cfg){
+    AD.cfg=cfg;if(cfg.enabled===false)return false;
+    var pre=(adPlat()==='ios'&&A.requestTrackingAuthorization)?A.requestTrackingAuthorization().catch(function(){}):Promise.resolve();
+    return pre.then(function(){return A.requestConsentInfo({})}).then(function(info){
+      if(info&&info.isConsentFormAvailable&&info.status==='REQUIRED')return A.showConsentForm();
+      return info;
+    }).then(function(info){
+      AD.privacy=!!(info&&info.privacyOptionsRequirementStatus==='REQUIRED');
+      if(info&&info.canRequestAds===false)return false;
+      return A.initialize({initializeForTesting:!!cfg.test,testingDevices:cfg.testDevices||[]}).then(function(){return true});
+    });
+  }).catch(function(){return false});
+  return AD.inited;
+}
+function adSlot(h){var r=document.documentElement.style;r.setProperty('--adh',(h||50)+'px')}
+function adMargin(){return 0}       // 플러그인이 하단 시스템 바 높이를 직접 더해 준다
+function adBanner(){
+  adInit().then(function(ok){
+    var A=PL('AdMob'),u=ok&&adUnit('banner');
+    if(!ok||!A||!u||AD.banner||AD.bl2)return;
+    AD.bl2=true;
+    if(!AD.bl){
+      AD.bl=true;
+    }
+    adSlot(0);
+    return A.showBanner({adId:u,adSize:'BANNER',position:'BOTTOM_CENTER',margin:adMargin(),isTesting:!!AD.cfg.test}).then(function(){AD.banner=true;AD.paused=false;AD.bl2=false;adSync()},function(){AD.bl2=false});
+  }).catch(function(){});
+}
+function adBannerPause(on){
+  if(!AD.banner||AD.paused===on)return;AD.paused=on;var A=PL('AdMob');
+  try{(on?A.hideBanner():A.resumeBanner()).catch(function(){})}catch(e){}
+}
+function adOpenLoad(){
+  adInit().then(function(ok){var A=PL('AdMob'),u=ok&&adUnit('appOpen');if(!ok||!A||!u)return;
+    if(!AD.ol){AD.ol=true;['Loaded','FailedToLoad','Opened','Closed','FailedToShow'].forEach(function(n){A.addListener('appOpenAd'+n,function(e){try{console.log('[ad] appOpen '+n+' '+JSON.stringify(e||{}))}catch(x){}if(n==='Closed'||n==='FailedToShow'){AD.showing=false;AD.closedAt=Date.now();hideSplash();setTimeout(adSync,900)}})})}
+    A.loadAppOpen({adId:u}).catch(function(){})});
+}
+function adGap(){var m=AD.cfg&&AD.cfg.openGapMin;return (typeof m==='number'?m:240)*60*1000}
+function adOpenReady(){
+  return adInit().then(function(ok){var A=PL('AdMob'),u=ok&&adUnit('appOpen');if(!ok||!A||!u)return false;return A.isAppOpenLoaded({adId:u}).then(function(r){return !!(r&&r.value)},function(){return false})});
+}
+function adOpenShow(){
+  if(Date.now()-AD.openAt<adGap())return Promise.resolve(false);
+  return adOpenReady().then(function(ready){
+    if(!ready)return false;
+    var A=PL('AdMob'),u=adUnit('appOpen');
+    AD.openAt=Date.now();lsSet('lotto.adOpenAt',AD.openAt);AD.showing=true;adBannerPause(true);   // 앱 오프닝은 배너 위에 겹치지 않는다
+    return A.showAppOpen({adId:u}).then(function(){adOpenLoad();return true},function(){adOpenLoad();return false});
+  }).catch(function(){return false});
+}
+function adAllowed(){          // 배너는 추천·분석·당첨·명당 목록에서만(내 번호·설정·빈 화면·오류·로딩·지도에는 두지 않는다). showBanner 는 ads.json 에서 켠다(기본 꺼짐)
+  if(!(AD.ready&&AD.cfg&&AD.cfg.showBanner===true&&rows.length))return false;
+  if(S.tab==='rec'||S.tab==='ana'||S.tab==='win')return true;
+  if(S.tab==='myeong'){
+    if(MY.mode==='near')return !!(NR.pos&&NR.data&&NR.view==='list');   // 위치를 찾기 전 안내 화면·지도(손가락으로 움직이는 화면)에는 두지 않는다
+    return !!(MY.data&&MY.data.list&&MY.data.list.length);
+  }
+  return false;
+}
+function adSync(){
+  if(!NATIVE||!AD.ready)return;
+  var on=adAllowed();
+  if(AD.showing)return;
+  if(on&&!AD.banner){
+    // 앱 오프닝 광고가 떴던 실행에서는 닫힌 뒤 6초가 지나야 배너를 붙인다(광고 직후에 광고가 이어지지 않게)
+    var wait=AD.closedAt?6000-(Date.now()-AD.closedAt):0;
+    if(wait>0){clearTimeout(AD.wt);AD.wt=setTimeout(adSync,wait+100);return}
+  }
+  document.documentElement.classList.toggle('ad',on);
+  if(on&&!AD.banner)adBanner();                // 분석 페이지에 처음 들어올 때 비로소 광고를 요청한다(보이지 않는 화면에서는 요청하지 않는다)
+  else if(AD.banner)adBannerPause(!on);
+}
+function adReserve(on){
+  var had=document.documentElement.classList.contains('ad');
+  AD.ready=!!on;adSlot(50);adSync();
+  if(had!==document.documentElement.classList.contains('ad'))window.scrollTo(0,0);
+}
+function hideSplash(){
+  if(AD.splashDone)return;AD.splashDone=true;
+  var b=document.getElementById('boot');if(b){b.classList.add('out');setTimeout(function(){b.remove()},320)}
+  setTimeout(adSync,900);           // 분석 페이지에 있다면 앱 오프닝이 끝나고 잠시 뒤에 배너를 붙인다(광고 바로 뒤에 광고가 겹치지 않게)
+}
+function adStart(){
+  if(!NATIVE)return;
+  setTimeout(function(){if(!AD.showing)hideSplash()},7000);   // 안전장치: 광고가 떠 있지 않다면 7초 안에 스플래시는 내린다
+  adInit().then(function(ok){
+    adReserve(ok&&!!adUnit('banner'));      // 배너 자리를 미리 확보(나중에 화면이 밀리지 않게)
+    if(!ok||FIRST){hideSplash();if(ok)adOpenLoad();return}   // 처음 실행엔 광고 없이 메인(알림 권한 안내와 겹치지 않게)
+    adOpenLoad();
+    var t0=Date.now();              // 최대 3.5초 동안 광고가 로드되길 기다렸다가, 되면 보여준다
+    (function poll(){
+      if(Date.now()-AD.openAt<adGap()){hideSplash();return}
+      adOpenReady().then(function(r){
+        if(r)adOpenShow().then(function(shown){if(!shown)hideSplash()});
+        else if(Date.now()-t0<3500)setTimeout(poll,300);
+        else hideSplash();
+      });
+    })();
+  });
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){AD.hiddenAt=Date.now();return}
+  if(Date.now()-AD.hiddenAt>AD_BG)adOpenShow();
+});
+
+/* ---------- 로또 명당: 1등을 많이 낸 판매점 순위(누적) ---------- */
+var MY={data:null,loading:false,mode:'rank',region:'전체',sort:'first',closed:false,limit:30};
+function loadMyeong(){
+  if(MY.loading)return;MY.loading=true;
+  var tasks=[getJson('data/myeongdang.json').catch(function(){return null})];
+  if(NATIVE||location.hostname!=='lotto.imeji.com')tasks.push(getJson(REMOTE+'myeongdang.json',8000).catch(function(){return null}));
+  Promise.all(tasks).then(function(rs){
+    var best=null;rs.forEach(function(r){if(r&&r.list&&(!best||r.rounds>=best.rounds))best=r});
+    MY.data=best||{list:[],rounds:0};MY.loading=false;if(S.tab==='myeong')render();
+  });
+}
+function myList(){
+  var out=[];
+  MY.data.list.forEach(function(x,i){
+    if(!MY.closed&&x[10]!==1)return;
+    if(MY.region!=='전체'&&x[5]!==MY.region)return;
+    out.push([x,i]);
+  });
+  if(MY.sort==='recent')out.sort(function(a,b){return b[0][11]-a[0][11]||b[0][6]-a[0][6]});
+  return out;
+}
+function vMyeong(){
+  if(MY.mode==='near')return vNear();
+  if(!MY.data){loadMyeong();return '<div class="sec"><div class="empty">불러오는 중…</div></div>'}
+  var d=MY.data;
+  if(!d.list.length)return '<div class="sec"><div class="empty">명당 정보를 불러오지 못했어요.<br>네트워크를 확인해 주세요.</div></div>';
+  var cnt={};d.list.forEach(function(x){if(MY.closed||x[10]===1)cnt[x[5]]=(cnt[x[5]]||0)+1});
+  var regs=['전체'].concat(Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}));
+  var list=myList(),show=list.slice(0,MY.limit);
+  var h='<div class="sec" style="margin-top:4px"><h2>1등을 많이 낸 판매점</h2><p class="sub">제 1~'+d.rounds+'회 누적 · 1등 3회 이상 · 누르면 지도로 볼 수 있어요</p>'+modeChips();
+  h+='<div class="chips" style="margin-bottom:10px">'+regs.map(function(r){return '<button class="chip '+(MY.region===r?'on':'')+'" data-mr="'+esc(r)+'">'+esc(r)+'</button>'}).join('')+'</div>';
+  h+='<div class="chips">'+[['first','1등 많은 순'],['recent','최근 1등 순']].map(function(o){return '<button class="chip '+(MY.sort===o[0]?'on':'')+'" data-ms="'+o[0]+'">'+o[1]+'</button>'}).join('')+'<button class="chip '+(MY.closed?'on':'')+'" data-a="mclosed">폐점 포함</button></div>';
+  h+='<div class="note">과거에 1등이 많이 나온 곳이라고 앞으로 당첨 확률이 높아지는 것은 아니에요. 판매량이 많은 곳에서 1등도 많이 나오는 경향이 있을 뿐이에요.</div></div>';
+  h+='<div class="sec">';
+  if(!show.length)h+='<div class="empty">조건에 맞는 판매점이 없어요.</div>';
+  show.forEach(function(p,k){
+    var x=p[0];
+    h+='<div class="rl" data-my="'+p[1]+'"><span class="rn" style="width:28px;color:var(--blue);font-weight:700;font-size:14px">'+(k+1)+'</span>'+
+      '<span style="flex:1;min-width:0;font-weight:600;font-size:14px;line-height:1.35">'+esc(x[1])+(x[10]===1?'':' <span class="tag w">폐점</span>')+'<br><span style="color:var(--sub);font-weight:400;font-size:12px">'+esc(x[2])+'</span></span>'+
+      '<span class="rm"><b style="color:var(--ink);font-size:15px">1등 '+x[6]+'회</b><br>최근 '+x[11]+'회 ›</span></div>';
+  });
+  if(list.length>show.length)h+='<button class="btn2" data-a="mmore" style="width:100%;margin-top:10px">더 보기 ('+(list.length-show.length)+'곳 남음)</button>';
+  h+='</div><div class="note" style="margin:4px 24px 0">판매점 정보는 동행복권 공개 자료예요. 폐업·이전했을 수 있으니 방문 전에 확인해 주세요.</div>';
+  return h;
+}
+function mapLinks(name,addr,lat,lon){
+  var q=encodeURIComponent(name);
+  return '<button class="lk" data-url="https://map.kakao.com/link/map/'+q+','+lat+','+lon+'">카카오맵으로 보기<span>›</span></button>'+
+    '<button class="lk" data-url="https://map.naver.com/p/search/'+encodeURIComponent(addr+' '+name)+'">네이버지도로 보기<span>›</span></button>'+
+    '<button class="lk" data-url="https://www.google.com/maps/search/?api=1&query='+lat+','+lon+'">구글지도로 보기<span>›</span></button>'+
+    '<button class="lk" data-copy="'+esc(addr)+'">주소 복사<span>›</span></button>';
+}
+function mySheet(i){
+  var x=MY.data&&MY.data.list[i];if(!x)return;
+  openSheet('<h3>'+esc(x[1])+'</h3><p class="sub">'+esc(x[2])+'</p><div class="tags" style="margin:0 0 6px"><span class="tag">1등 '+x[6]+'회</span><span class="tag">자동 '+x[7]+' · 수동 '+x[8]+(x[9]?' · 반자동 '+x[9]:'')+'</span><span class="tag">'+esc(x[5])+'</span>'+(x[10]===1?'':'<span class="tag w">폐점</span>')+'</div>'+
+    '<div class="note" style="margin:6px 0 4px">최근 1등: '+x[12].map(function(r){return '제 '+r+'회'}).join(', ')+'</div>'+mapLinks(x[1],x[2],x[3],x[4])+
+    '<div class="note">판매점 정보는 동행복권 공개 자료예요. 폐업·이전했을 수 있어요.</div><button class="close" data-a="x">닫기</button>');
+}
+function openSub(n){if(!SUBS[S.tab])S.prev=S.tab;S.tab=n;render();window.scrollTo(0,0)}
+
+/* ---------- 용지 QR 스캔: 번호를 읽어 내 번호에 저장하고 바로 당첨 확인 ---------- */
+// 용지 QR 주소 예: https://qr.dhlottery.co.kr/?v=1246m041723323845m091421303542q010307194445<일련번호>
+// v= 뒤: 회차(4자리) + 게임 반복(영문 1자 + 번호 12자리) + 일련번호. 동행복권 도메인이 아니면 열지 않는다.
+function parseQr(txt){
+  var u;try{u=new URL(String(txt).trim())}catch(e){return null}
+  if(!/^https?:$/.test(u.protocol)||!/(^|\.)dhlottery\.co\.kr$/i.test(u.hostname))return null;
+  var v=u.searchParams.get('v');if(!v)return null;
+  var m=/^(\d{4})((?:[a-z]\d{12})+)\d*$/i.exec(v);if(!m)return null;
+  var games=[],re=/[a-z](\d{12})/gi,g;
+  while((g=re.exec(m[2]))){
+    var nums=[];for(var i=0;i<12;i+=2)nums.push(+g[1].slice(i,i+2));
+    if(nums.some(function(n){return n<1||n>45})||new Set(nums).size!==6)return null;
+    games.push(nums.sort(function(a,b){return a-b}));
+  }
+  return games.length?{round:+m[1],games:games}:null;
+}
+function prizeLine(rk,r){
+  if(rk===5)return '5천원';if(rk===4)return '5만원';
+  var p=prizes[r];if(!p)return '동행복권에서 확인';
+  return won(rk===1?p.a1:rk===2?p.a2:p.a3);
+}
+function qrSheet(q){
+  var d=drawOf(q.round),h='<h3>제 '+q.round+'회 용지</h3><p class="sub">'+q.games.length+'게임 · '+(d?d.date+' 추첨 결과와 맞춰 봤어요':'아직 추첨 전이에요')+'</p>',best=0;
+  q.games.forEach(function(g,i){
+    var c=d?L.check(g,d):null;if(c&&c.rank&&(!best||c.rank<best))best=c.rank;
+    h+='<div class="game"><div class="gtop"><b>'+'ABCDEFGHIJ'[i]+'</b><div class="balls">'+g.map(function(n){var hit=c&&(c.hit.indexOf(n)>=0||(c.bonus&&n===d.bonus));return '<span class="b sm '+(hit?'hit':(c?'mut':''))+'" style="background:'+L.ballColor(n)+'">'+n+'</span>'}).join('')+'</div><span style="margin-left:auto">'+(c?badge(c.rank):'')+'</span></div>'+
+      (c&&c.rank?'<div class="tags"><span class="tag g">'+c.rank+'등 · '+prizeLine(c.rank,q.round)+'</span></div>':'')+'</div>';
+  });
+  h+=d?(best?'<div class="desc">🎉 가장 높은 등수는 <b>'+best+'등</b>이에요. 당첨금은 동행복권 공식 안내에 따라 수령하세요.</div>':'<div class="desc">아쉽게도 이번 용지는 낙첨이에요.</div>'):'<div class="desc">내 번호에 저장했어요. 추첨이 끝나면 자동으로 맞춰 봐요.</div>';
+  h+='<div class="row2" style="margin-top:14px"><button class="close gh" data-a="x">닫기</button><button class="close" data-a="gomine">내 번호 보기</button></div>';
+  openSheet(h);
+}
+function handleQr(txt){
+  var q=parseQr(txt);
+  if(!q){toast('로또 6/45 용지 QR이 아니에요');return}
+  var c=0;q.games.forEach(function(g){if(addMine(g,'qr',q.round))c++});
+  qrSheet(q);
+  if(c)toast(c+'게임을 내 번호에 저장했어요');
+}
+function scanQr(){
+  // 안드로이드·iOS 공통: @capacitor/barcode-scanner (iOS는 Apple Vision, 안드로이드는 ML Kit). 카메라 권한은 처음 쓸 때 시스템이 묻는다.
+  var BS=PL('CapacitorBarcodeScanner');
+  if(!NATIVE||!BS){toast('QR 확인은 앱에서만 쓸 수 있어요');return}
+  BS.scanBarcode({
+    hint:0,                                   // 0 = QR 코드만
+    scanInstructions:'용지 아래쪽 QR 코드를 사각형 안에 맞춰 주세요',
+    scanButton:false,
+    cameraDirection:1,                        // 1 = 뒷면 카메라
+    scanOrientation:1,                        // 1 = 세로
+    android:{scanningLibrary:'mlkit'}
+  }).then(function(r){
+    var v=r&&r.ScanResult;
+    if(v)handleQr(v);                         // 취소하면 값이 비어 있다
+  },function(e){
+    var m=String(e&&(e.message||e.errorMessage)||e);
+    if(/cancel|dismiss|close/i.test(m))return;
+    toast(/permission|denied|authoriz|권한/i.test(m)?'카메라 권한이 필요해요. 기기 설정에서 이 앱의 카메라를 허용해 주세요':'스캔하지 못했어요. 다시 시도해 주세요');
+  });
+}
+function tg(on,attr){return '<button class="tg '+(on?'on':'')+'" '+attr+' aria-label="켜기/끄기"></button>'}
+function chipRow(vals,cur,attr,fmt){return '<div class="chips" style="margin:2px 0 12px">'+vals.map(function(v){return '<button class="chip '+(cur===v?'on':'')+'" '+attr+'="'+v+'">'+fmt(v)+'</button>'}).join('')+'</div>'}
+var PERM='web',VER='',VT={n:0,t:0};
+function vSet(){
+  var st=PERM,n=S.n,h='';
+    h+='<div class="lab" style="margin-top:6px">알림</div>';
+    if(st==='web')h+='<div class="note" style="margin:0 0 8px">알림은 앱에서만 쓸 수 있어요.</div>';
+    else if(st!=='granted')h+='<div class="warn" style="margin:0 0 8px">알림 권한이 꺼져 있어요. <button class="btn2 pri" data-a="permask" style="margin-left:6px">알림 허용</button><br><small>허용 창이 안 뜨면 기기 설정 → 앱 → 로또번호발생기 → 알림에서 켜 주세요.</small></div>';
+    h+='<div class="sw"><div>구매 마감 알림<small>토요일 20:00 판매 마감 전에 알려요</small></div>'+tg(n.deadline,'data-nt="deadline"')+'</div>';
+    if(n.deadline){h+=chipRow([10,30,60],n.deadMin,'data-nm',function(v){return v+'분 전'});
+      h+='<div class="sw" style="border-top:0;padding-top:0"><div>정확한 시각에 받기<small>끄면 기기가 알림을 최대 1시간까지 늦출 수 있어요. 켜면 \'알람 및 리마인더\' 허용 화면이 열려요.</small></div>'+tg(n.exact,'data-nt="exact"')+'</div>'}
+    h+='<div class="sw"><div>당첨번호 발표 알림<small>새 회차 당첨번호가 올라오면 알려요</small></div>'+tg(n.draw,'data-nt="draw"')+'</div>';
+    h+='<div class="sw"><div>추첨일 번호 알림<small>토요일 낮에 번호를 정하라고 알려요</small></div>'+tg(n.remind,'data-nt="remind"')+'</div>';
+    if(n.remind)h+=chipRow([12,15,17,18],n.remindHour,'data-nh',function(v){return v+'시'});
+    h+='<div class="lab">내 데이터</div><button class="lk" data-a="clearmine">저장한 번호 모두 삭제 ('+mine.length+'게임)<span>›</span></button><div class="note" style="margin-top:0">저장한 번호와 설정은 이 기기에만 있어요.</div>';
+    if(AD.privacy)h+='<div class="lab">광고</div><button class="lk" data-a="adprivacy">광고 개인정보 설정<span>›</span></button>';
+    h+='<div class="lab">약관·정책</div><button class="lk" data-url="'+SITE+'privacy.html">개인정보처리방침<span>›</span></button><button class="lk" data-url="'+SITE+'terms.html">이용약관<span>›</span></button>';
+    h+='<div class="lab">도움</div><a class="lk" href="tel:1336">도박 문제 상담 1336 (한국도박문제예방치유원)<span>›</span></a><button class="lk" data-url="https://www.dhlottery.co.kr">공식 구매·결과 확인 (동행복권)<span>›</span></button>';
+    h+='<div class="lab">정보</div><div class="note" style="margin-top:0">이 앱은 동행복권과 관련 없는 비공식 앱이며, 복권 구매 대행·결제 기능이 없어요. 만 19세 미만은 복권을 구매할 수 없어요. 추천 번호는 당첨을 보장하지 않아요.<br>당첨번호 출처: 동행복권 공개 당첨 결과(매주 토요일 추첨 후 자동 갱신)<br>데이터: 제 '+lastRound()+'회까지 · 갱신 '+esc((latest&&latest.updated||'').slice(0,10))+'<br>오픈소스: Capacitor(MIT), Firebase SDK(Apache-2.0), Leaflet(BSD-2)<br>지도 데이터 © OpenStreetMap 기여자(ODbL)<br><span data-a="vtap">'+(VER||'버전')+'</span>'+(ls('lotto.testAds',0)===1?' · 테스트 광고 모드':'')+'</div>';
+  return h;
+}
+function settingsSheet(){
+  if(!SUBS[S.tab])S.prev=S.tab;
+  S.tab='settings';render();window.scrollTo(0,0);
+  permState().then(function(st){PERM=st;if(S.tab==='settings')render()});
+  var A=PL('App');if(A&&A.getInfo&&!VER)A.getInfo().then(function(i){VER='버전 '+i.version+' ('+i.build+')';if(S.tab==='settings')render()},function(){});
+}
+
+/* ---------- 동작 ---------- */
+function doGo(){
+  var prev=rows.length?L.draw(rows[rows.length-1]).nums:[];
+  var r=L.recommend(rows,{mode:S.mode,fixed:S.fixed,exclude:S.exclude,window:S.win,prev:prev},S.games);
+  if(r.error){toast(r.error);return}
+  result={games:r.games,mode:S.mode,round:nextRound()};
+  render();
+  var s=document.querySelector('.game');if(s)s.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function addMine(nums,mode,round){
+  var key=nums.join(',');
+  if(mine.some(function(m){return m.round===round&&m.nums.join(',')===key})){return false}
+  mine.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),nums:nums.slice(),round:round,mode:mode,at:Date.now()});saveMine();return true;
+}
+function shareText(t){
+  try{var P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Share;if(P){P.share({text:t});return}}catch(e){}
+  if(navigator.share){navigator.share({text:t}).catch(function(){});return}
+  copy(t);
+}
+function copy(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast('복사했어요')},function(){toast('복사하지 못했어요')});
+  else{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('복사했어요')}catch(e){toast('복사하지 못했어요')}a.remove()}
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-t],[data-mode],[data-games],[data-win],[data-range],[data-sort],[data-num],[data-round],[data-pg],[data-rd],[data-save],[data-del],[data-p],[data-m],[data-a],[data-nt],[data-nm],[data-nh],[data-url],[data-store],[data-copy],[data-mr],[data-ms],[data-my],[data-mm],[data-nr],[data-ns],[data-nv],[data-nx]');
+  if(e.target.id==='sheet'){closeSheet();return}
+  if(!t)return;var d=t.dataset;
+  if(d.t){S.tab=d.t;S.rpage=1;render();window.scrollTo(0,0);return}
+  if(d.mode){S.mode=d.mode;save();render();return}
+  if(d.games){S.games=+d.games;save();render();return}
+  if(d.win){S.win=+d.win;save();render();return}
+  if(d.range!=null){S.range=+d.range;S.rpage=1;save();render();return}
+  if(d.sort){S.sort=d.sort;save();render();return}
+  if(d.num){numSheet(+d.num);return}
+  if(d.round){S.sel=+d.round;S.tab='win';render();window.scrollTo(0,0);return}
+  if(d.pg){S.rpage+=+d.pg;render();return}
+  if(d.rd){S.sel=Math.min(lastRound(),Math.max(1,(S.sel||lastRound())+ +d.rd));render();return}
+  if(d.save!=null){var g=result.games[+d.save];toast(addMine(g.nums,result.mode,result.round)?'내 번호에 저장했어요':'이미 저장된 번호예요');return}
+  if(d.del){mine=mine.filter(function(m){return m.id!==d.del});saveMine();render();return}
+  if(d.p){var n=+d.p,fi=tmp.fixed.indexOf(n),ei=tmp.exclude.indexOf(n);
+    if(fi>=0){tmp.fixed.splice(fi,1);tmp.exclude.push(n)}else if(ei>=0){tmp.exclude.splice(ei,1)}else{if(tmp.fixed.length>=5){toast('꼭 넣을 번호는 5개까지예요');return}tmp.fixed.push(n)}
+    drawPick();return}
+  if(d.m){var k=+d.m,i=man.nums.indexOf(k);if(i>=0)man.nums.splice(i,1);else{if(man.nums.length>=6){toast('6개까지 고를 수 있어요');return}man.nums.push(k)}drawMan();return}
+  if(d.url){openUrl(d.url);return}
+  if(d.mm){MY.mode=d.mm;window.scrollTo(0,0);render();return}
+  if(d.nr){NR.radius=+d.nr;NR.limit=30;render();return}
+  if(d.ns){NR.sort=d.ns;NR.limit=30;render();return}
+  if(d.nv){NR.view=d.nv;render();return}
+  if(d.nx!=null){nearSheet(+d.nx);return}
+  if(d.mr){MY.region=d.mr;MY.limit=30;render();return}
+  if(d.ms){MY.sort=d.ms;MY.limit=30;render();return}
+  if(d.my!=null){mySheet(+d.my);return}
+  if(d.store){var sp=d.store.split(':');storeSheet(+sp[0],+sp[1]);return}
+  if(d.copy){copy(d.copy);return}
+  if(d.nm){S.n.deadMin=+d.nm;save();applyNotifs();render();return}
+  if(d.nh){S.n.remindHour=+d.nh;save();applyNotifs();render();return}
+  if(d.nt){
+    var k=d.nt,on=!S.n[k];
+    var go=function(){S.n[k]=on;save();applyNotifs();render()};
+    if(on&&NATIVE)permState().then(function(st){if(st==='granted')go();else askPerm().then(function(ok){if(ok)go();else toast('기기 설정에서 알림을 허용해 주세요')})});
+    else if(on&&!NATIVE)toast('알림은 앱에서만 쓸 수 있어요');
+    else go();
+    return}
+  switch(d.a){
+    case 'go':doGo();break;
+    case 'pick':pickSheet();break;
+    case 'pickclear':tmp.fixed=[];tmp.exclude=[];drawPick();break;
+    case 'pickok':S.fixed=tmp.fixed.sort(function(a,b){return a-b});S.exclude=tmp.exclude.sort(function(a,b){return a-b});save();closeSheet();render();break;
+    case 'saveall':{var c=0;result.games.forEach(function(g){if(addMine(g.nums,result.mode,result.round))c++});toast(c?c+'게임을 저장했어요':'이미 모두 저장돼 있어요');break}
+    case 'share':shareText('로또 제 '+result.round+'회 추천 번호\n'+result.games.map(function(g,i){return 'ABCDE'[i]+'  '+g.nums.map(pad).join(' ')}).join('\n'));break;
+    case 'bonus':S.bonus=!S.bonus;save();render();break;
+    case 'add':manualSheet();break;
+    case 'manok':{if(man.nums.length!==6){toast('번호 6개를 골라 주세요');return}var r=+$('#mr').value;toast(addMine(man.nums.slice().sort(function(a,b){return a-b}),'manual',r)?'저장했어요':'이미 저장된 번호예요');closeSheet();S.tab='mine';render();break}
+    case 'export':{if(!mine.length){toast('저장한 번호가 없어요');return}copy(mine.slice().sort(function(a,b){return b.round-a.round}).map(function(m){return m.round+'회  '+m.nums.map(pad).join(' ')}).join('\n'));break}
+    case 'goround':roundSheet();break;
+    case 'rok':{var v=+$('#ri').value;if(!(v>=1&&v<=lastRound())){toast('1~'+lastRound()+' 사이로 입력해 주세요');return}S.sel=v;closeSheet();render();break}
+    case 'settings':settingsSheet();break;
+    case 'adprivacy':try{PL('AdMob').showPrivacyOptionsForm().catch(function(){})}catch(e){}break;
+    case 'vtap':{VT.n++;clearTimeout(VT.t);VT.t=setTimeout(function(){VT.n=0},3000);
+      if(VT.n>=7){VT.n=0;var on=ls('lotto.testAds',0)!==1;lsSet('lotto.testAds',on?1:0);toast(on?'테스트 광고 모드를 켰어요. 앱을 다시 켜면 적용돼요':'테스트 광고 모드를 껐어요. 앱을 다시 켜면 적용돼요');render()}
+      break}
+    case 'qr':scanQr();break;
+    case 'nlocate':locate();break;
+    case 'nmore':NR.limit+=30;render();break;
+    case 'myeong':S.tab='myeong';render();window.scrollTo(0,0);break;
+    case 'mclosed':MY.closed=!MY.closed;MY.limit=30;render();break;
+    case 'mmore':MY.limit+=30;render();break;
+    case 'gomine':closeSheet();S.tab='mine';render();window.scrollTo(0,0);break;
+    case 'two':S.show2=!S.show2;render();break;
+    case 'permask':askPerm().then(function(ok){if(ok)applyNotifs();else toast('기기 설정에서 알림을 허용해 주세요');permState().then(function(st){PERM=st;render()})});break;
+    case 'clearmine':if(!mine.length){toast('저장한 번호가 없어요');break}if(confirm('저장한 번호 '+mine.length+'게임을 모두 삭제할까요? 되돌릴 수 없어요.')){mine=[];saveMine();toast('모두 삭제했어요');render()}break;
+    case 'x':closeSheet();break;
+    case 'back':S.tab=S.prev||HOME;render();window.scrollTo(0,0);break;
+  }
+});
+
+/* 오래 켜 둔 앱이 일요일에 열려도 D-day·최신 회차가 맞도록: 포그라운드로 돌아오면 다시 읽는다 */
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&rows.length){var b=lastRound();loadData().then(function(){if(lastRound()!==b)render()},function(){})}});
+
+loadData().then(function(){render()},function(){render()});
+nativeSplashOff();
+if(!NATIVE&&/^#qr=/.test(location.hash)){loadData().then(function(){render();handleQr(decodeURIComponent(location.hash.slice(4)))})}
+if(!NATIVE&&/^#loc=/.test(location.hash)){var lc=location.hash.slice(5).split(',');loadData().then(function(){NR.pos={lat:+lc[0],lon:+lc[1]};MY.mode='near';S.tab='myeong';render()})}
+initBack();
+initNotifs();
+adStart();
+})();
+</script>
+</body>
+</html>

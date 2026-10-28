@@ -1,0 +1,25 @@
+{
+  "_설명": [
+    "광고 설정입니다. 고쳐서 푸시하면 앱 업데이트 없이 반영돼요.",
+    "enabled:false 면 광고를 모두 끕니다(비상 스위치).",
+    "배너·앱오프닝 단위 ID는 AdMob 에서 앱을 만든 뒤 광고 단위로 만들어요.",
+    "showBanner:true 로 바꾸면 분석·당첨 페이지 상단에 배너가 나와요(앱 오프닝 광고는 항상). 처음엔 꺼 두고, 정책 센터 경고가 없는지 보며 켜세요.",
+    "test:true 로 바꾸면 모든 기기에서 구글 테스트 광고가 나와요. test:false 여도 testDevices 에 넣은 기기에서는 실제 광고 ID로 요청해도 테스트 광고가 나와요(내 폰에서 광고를 눌러 계정이 위험해지는 일을 막아요).",
+    "testDevices 에는 기기별 ID를 넣어요. 로그캣에 'setTestDeviceIds' 로 시작하는 줄로 나와요."
+  ],
+  "enabled": true,
+  "test": false,
+  "android": {
+    "banner": "ca-app-pub-7287591857948115/5158039392",
+    "appOpen": "ca-app-pub-7287591857948115/2083038087"
+  },
+  "ios": {
+    "banner": "",
+    "appOpen": ""
+  },
+  "openGapMin": 5,
+  "showBanner": true,
+  "testDevices": [
+    "CD174FA11FD1B3F8B9AD6129C7425B3B"
+  ]
+}
